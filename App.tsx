@@ -7,8 +7,7 @@ import { Product, ProductCategory, CartItem, PizzaSize, OrderAnalysisResult, Add
 import ProductCard from './components/ProductCard';
 import CartSidebar from './components/CartSidebar';
 import SmartOrderModal from './components/SmartOrderModal';
-import CheckoutModal from './components/CheckoutModal';
-import PrintReceiptModal from './components/PrintReceiptModal';
+import NavigationButton from './components/NavigationButton';
 import HalfAndHalfModal from './components/HalfAndHalfModal';
 import AdminPanel from './components/AdminPanel';
 import OrderHistory from './components/OrderHistory';
@@ -18,6 +17,8 @@ import LoginScreen from './components/LoginScreen';
 import DeliveryFeesModal from './components/DeliveryFeesModal';
 import CustomerList from './components/CustomerList';
 import DeliveryDashboard from './components/DeliveryDashboard';
+import CheckoutModal from './components/CheckoutModal';
+import PrintReceiptModal from './components/PrintReceiptModal';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 type ViewMode = 'POS' | 'ADMIN' | 'HISTORY' | 'CLIENTS' | 'DELIVERY_DASHBOARD';
@@ -222,18 +223,60 @@ function App() {
             { id: 'HISTORY', icon: History, label: 'Relatórios' },
             { id: 'CLIENTS', icon: Users, label: 'Clientes' },
             { id: 'ADMIN', icon: Settings, label: 'Configurações', role: 'ADMIN' }
-          ].map(item => {
-            const Icon = item.icon;
-            return (item.role === 'ADMIN' && currentUser.role !== 'ADMIN') ? null : (
-              <button key={item.id} onClick={() => setViewMode(item.id as ViewMode)} className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black transition-all text-base uppercase tracking-tight ${viewMode === item.id ? 'bg-primary text-white shadow-xl shadow-primary/20 scale-105' : 'text-gray-400 hover:bg-dark-700 hover:text-white'}`}>
-                <Icon size={24} /> <span className="hidden md:block">{item.label}</span>
-              </button>
-            );
-          })}
+          ].map(item => (
+            <NavigationButton
+              key={item.id}
+              id={item.id}
+              icon={item.icon}
+              label={item.label}
+              isActive={viewMode === item.id}
+              onClick={() => setViewMode(item.id as ViewMode)}
+              role={item.role}
+              currentUserRole={currentUser.role}
+            />
+          ))}
         </nav>
         <div className="p-6 border-t border-dark-700 space-y-3">
-          <button onClick={() => setIsRegisterModalOpen(true)} className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black text-base uppercase tracking-tight ${registerSession ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10'}`}><DollarSign size={24} /> <span className="hidden md:block">{registerSession ? 'Caixa Aberto' : 'Caixa Fechado'}</span></button>
-          <button onClick={() => setCurrentUser(null)} className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-black text-gray-500 hover:text-red-500 hover:bg-red-500/10 uppercase tracking-tight"><LogOut size={24} /><span className="hidden md:block">Sair</span></button>
+          <button
+            onClick={() => setIsRegisterModalOpen(true)}
+            className={`
+              group/btn relative w-full flex flex-col items-center justify-center
+              rounded-xl py-2 px-1 transition-all duration-200
+              ${registerSession
+                ? 'bg-green-500/10 text-green-500 border-2 border-green-500/20 hover:bg-green-500/20'
+                : 'bg-red-500/10 text-red-500 border-2 border-red-500/20 hover:bg-red-500/20'
+              }
+              md:flex-row md:gap-4 md:px-5 md:py-4 md:rounded-2xl
+              active:scale-95
+            `}
+          >
+            <DollarSign
+              size={24}
+              className="transition-all duration-200 md:group-hover/btn:scale-110"
+            />
+            <span className="text-xs font-bold uppercase tracking-tight mt-1 md:text-base md:mt-0 md:block">
+              {registerSession ? 'Caixa Aberto' : 'Caixa Fechado'}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setCurrentUser(null)}
+            className="
+              group/btn relative w-full flex flex-col items-center justify-center
+              bg-gray-50 hover:bg-red-50 border-2 border-gray-100 hover:border-red-400/40
+              rounded-xl py-2 px-1 transition-all duration-200 text-gray-600 hover:text-red-500
+              md:flex-row md:gap-4 md:px-5 md:py-4 md:rounded-2xl
+              active:scale-95
+            "
+          >
+            <LogOut
+              size={24}
+              className="transition-all duration-200 md:group-hover/btn:scale-110"
+            />
+            <span className="text-xs font-bold uppercase tracking-tight mt-1 md:text-base md:mt-0 md:block">
+              Sair
+            </span>
+          </button>
         </div>
       </aside>
 
@@ -249,13 +292,68 @@ function App() {
                     <input type="text" placeholder="Buscar sabor, código ou descrição..." className="w-full pl-12 pr-6 py-4 bg-gray-50 border-2 border-gray-100 rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/5 text-lg font-bold" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                   </div>
                   <div className="flex gap-3">
-                    <button onClick={() => { setHalfAndHalfSlots(2); setIsHalfAndHalfOpen(true); }} className="px-6 py-4 bg-orange-100 text-primary rounded-2xl font-black text-lg uppercase tracking-widest shadow-sm hover:bg-orange-200 transition-colors">1/2</button>
-                    <button onClick={() => setIsSmartOrderOpen(true)} className="px-8 py-4 bg-primary text-white rounded-2xl font-black text-lg shadow-xl shadow-primary/20 flex items-center gap-3 group uppercase tracking-widest transition-all hover:scale-105"><Sparkles size={24} className="group-hover:rotate-12 transition-transform"/> IA ATENDENTE</button>
+                    <button
+                      onClick={() => { setHalfAndHalfSlots(2); setIsHalfAndHalfOpen(true); }}
+                      className="
+                        px-4 py-3 bg-orange-100 text-primary rounded-xl font-bold text-sm uppercase tracking-widest
+                        shadow-sm hover:bg-orange-200 transition-all
+                        md:px-6 md:py-4 md:rounded-2xl md:text-lg
+                        active:scale-95
+                      "
+                    >
+                      1/2
+                    </button>
+                    <button
+                      onClick={() => setIsSmartOrderOpen(true)}
+                      className="
+                        px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20
+                        flex items-center justify-center gap-2 group uppercase tracking-widest transition-all
+                        hover:scale-105 hover:shadow-xl hover:shadow-primary/30
+                        md:px-8 md:py-4 md:rounded-2xl md:text-lg md:gap-3
+                        active:scale-95
+                      "
+                    >
+                      <Sparkles
+                        size={20}
+                        className="group-hover:rotate-12 transition-transform md:w-6 md:h-6"
+                      />
+                      <span className="hidden sm:inline">IA ATENDENTE</span>
+                      <span className="sm:hidden">IA</span>
+                    </button>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-6 overflow-x-auto pb-2 no-scrollbar">
-                  <button onClick={() => setActiveCategory('Todos')} className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest border-2 transition-all shrink-0 ${activeCategory === 'Todos' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`}>Todos</button>
-                  {categories.map(cat => <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest border-2 transition-all shrink-0 ${activeCategory === cat ? 'bg-primary text-white border-primary' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`}>{cat}</button>)}
+                  <button
+                    onClick={() => setActiveCategory('Todos')}
+                    className={`
+                      px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest border-2 transition-all shrink-0
+                      ${activeCategory === 'Todos'
+                        ? 'bg-gray-800 text-white border-gray-800 shadow-md'
+                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+                      }
+                      md:px-6 md:text-xs
+                      active:scale-95
+                    `}
+                  >
+                    Todos
+                  </button>
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`
+                        px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest border-2 transition-all shrink-0
+                        ${activeCategory === cat
+                          ? 'bg-primary text-white border-primary shadow-md'
+                          : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+                        }
+                        md:px-6 md:text-xs
+                        active:scale-95
+                      `}
+                    >
+                      {cat}
+                    </button>
+                  ))}
                 </div>
               </header>
               {/* Product Grid - Scrollable area */}
