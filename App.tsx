@@ -8,6 +8,7 @@ import ProductCard from './components/ProductCard';
 import CartSidebar from './components/CartSidebar';
 import SmartOrderModal from './components/SmartOrderModal';
 import CheckoutModal from './components/CheckoutModal';
+import PrintReceiptModal from './components/PrintReceiptModal';
 import HalfAndHalfModal from './components/HalfAndHalfModal';
 import AdminPanel from './components/AdminPanel';
 import OrderHistory from './components/OrderHistory';
@@ -117,6 +118,7 @@ function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('POS');
   const [isSmartOrderOpen, setIsSmartOrderOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isHalfAndHalfOpen, setIsHalfAndHalfOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isDeliveryFeesModalOpen, setIsDeliveryFeesModalOpen] = useState(false);
@@ -169,7 +171,7 @@ function App() {
         setCustomers([{ id: generateId(), name: customerName, phone: customerPhone, address, totalOrders: 1, totalSpent: total }, ...customers]);
       }
     }
-    setTimeout(() => { window.print(); }, 300);
+    setIsPrintModalOpen(true);
   };
 
   const handleSmartOrderConfirm = (result: OrderAnalysisResult, autoPrint: boolean) => {
@@ -280,6 +282,7 @@ function App() {
 
       <SmartOrderModal isOpen={isSmartOrderOpen} onClose={() => setIsSmartOrderOpen(false)} onConfirmOrder={handleSmartOrderConfirm} products={products} />
       <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} total={cart.reduce((s, i) => s + (i.selectedSize === PizzaSize.SMALL ? (i.product.priceSmall || i.product.price*0.8) : i.product.price) * i.quantity, 0)} onConfirm={handleCheckoutConfirm} deliveryFees={storeConfig.deliveryFees} customers={customers} motoboys={motoboys} initialCustomer={pendingCustomer} />
+      <PrintReceiptModal order={lastOrder} storeConfig={storeConfig} isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} />
       <HalfAndHalfModal isOpen={isHalfAndHalfOpen} onClose={() => setIsHalfAndHalfOpen(false)} products={products} onConfirm={(f, s) => setCart([...cart, { cartId: generateId(), product: f[0], secondProduct: f[1], isHalfAndHalf: true, quantity: 1, selectedSize: s }])} maxSlots={halfAndHalfSlots} />
       <RegisterModal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} session={registerSession} orders={orders} onOpenRegister={f => setRegisterSession({ isOpen: true, openedAt: new Date(), initialFloat: f })} onCloseRegister={() => setRegisterSession(null)} />
       <DeliveryFeesModal isOpen={isDeliveryFeesModalOpen} onClose={() => setIsDeliveryFeesModalOpen(false)} fees={storeConfig.deliveryFees} />
