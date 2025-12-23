@@ -140,8 +140,7 @@ function App() {
     address: Address | undefined, 
     deliveryFee: number,
     motoboyId?: string,
-    customerId?: string,
-    splitPeople?: number
+    customerId?: string
   ) => {
     const subtotal = cart.reduce((sum, item) => {
       let p = item.selectedSize === PizzaSize.SMALL ? (item.product.priceSmall || item.product.price * 0.8) : item.product.price;
@@ -155,7 +154,7 @@ function App() {
       id: generateId(), customerName, customerPhone, customerId, motoboyId, motoboyName: motoboy?.name,
       orderType, status: orderType === 'DELIVERY' ? 'DELIVERING' : 'COMPLETED',
       items: [...cart], total, subtotal, deliveryFee, paymentMethod: payments[0]?.method || 'CASH',
-      payments, address, date: new Date(), splitPeople
+      payments, address, date: new Date()
     };
 
     setOrders([newOrder, ...orders]);

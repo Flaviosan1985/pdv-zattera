@@ -1,4 +1,3 @@
-
 export enum ProductCategory {
   PIZZA = 'Pizza',
   SWEET_PIZZA = 'Pizza Doce',
@@ -7,7 +6,7 @@ export enum ProductCategory {
 }
 
 export enum PizzaSize {
-  SMALL = 'Pequena', // Broto
+  SMALL = 'Pequena',
   MEDIUM = 'Média',
   LARGE = 'Grande'
 }
@@ -15,11 +14,11 @@ export enum PizzaSize {
 export interface Product {
   id: string;
   name: string;
-  description: string;
-  price: number; 
-  priceSmall?: number; 
-  category: string; 
-  image: string;
+  description?: string;
+  price: number;
+  priceSmall?: number;
+  category?: string;
+  image?: string;
   allowSize?: boolean;
 }
 
@@ -32,8 +31,6 @@ export interface CartItem {
   quantity: number;
   selectedSize?: PizzaSize;
 }
-
-export type PaymentMethod = 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'CASH';
 
 export interface Address {
   street: string;
@@ -49,16 +46,18 @@ export interface OrderAnalysisResult {
     quantity: number;
     size?: PizzaSize;
     isHalfAndHalf?: boolean;
-    flavors?: string[]; // IDs para pizzas meio a meio
+    flavors?: string[];
   }[];
   customerName?: string;
   customerPhone?: string;
   address?: Address;
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'CASH';
   orderType?: 'DELIVERY' | 'PICKUP';
   confirmationMessage: string;
-  missingInfo?: string[]; // Orientações do que falta no pedido
+  missingInfo?: string[];
 }
+
+export type PaymentMethod = 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'CASH';
 
 export interface PaymentPart {
   method: PaymentMethod;
@@ -93,14 +92,13 @@ export interface Order {
   motoboyId?: string;
   motoboyName?: string;
   orderType: OrderType;
-  status: OrderStatus;
+  status?: OrderStatus;
   items: CartItem[];
   total: number;
   subtotal: number;
   deliveryFee: number;
-  paymentMethod: PaymentMethod;
-  payments: PaymentPart[];
-  splitPeople?: number;
+  paymentMethod?: 'CASH' | 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD';
+  payments?: PaymentPart[];
   changeNeeded?: number;
   address?: Address;
   date: Date;
@@ -137,7 +135,6 @@ export interface DeliveryFee {
 
 export type FiscalModule = 'NONE' | 'NFC_E' | 'SAT';
 
-// Define SatConfig and SatResponse to resolve import issues in satService.ts
 export interface SatConfig {
   activationCode: string;
   signAC: string;
@@ -157,16 +154,16 @@ export interface SatResponse {
 
 export interface StoreConfig {
   name: string;
-  logo: string;
-  cnpj?: string;
+  address: string;
+  cnpj: string;
   phone?: string;
-  address?: string;
-  deliveryFees: DeliveryFee[];
-  fiscalModule: FiscalModule;
-  nfce: {
+  logo?: string;
+  deliveryFees?: DeliveryFee[];
+  fiscalModule?: FiscalModule;
+  nfce?: {
     environment: 'HOMOLOGATION' | 'PRODUCTION';
     csc: string;
     cscId: string;
   };
-  sat: SatConfig;
+  sat?: SatConfig;
 }
