@@ -1,0 +1,5 @@
+{
+  "name": "PizzaAI POS",
+  "description": "A modern, AI-powered Point of Sale system for pizzerias featuring smart natural language ordering via Gemini.",
+  "requestFramePermissions": []
+}
