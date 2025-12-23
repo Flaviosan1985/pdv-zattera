@@ -1,6 +1,6 @@
 import React from 'react';
 import { Order, PizzaSize, StoreConfig, PaymentPart } from '../types';
-import { imprimirCupomTermico } from '../services/printService';
+import { imprimirCupomExato } from '../services/printService';
 
 interface PrintReceiptModalProps {
   order: Order | null;
@@ -66,7 +66,7 @@ const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ order, storeConfi
 
   const handlePrint = () => {
     if (order && storeConfig) {
-      imprimirCupomTermico(order, storeConfig);
+      imprimirCupomExato(order, storeConfig);
     }
   };
 

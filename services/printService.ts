@@ -1,8 +1,8 @@
 import { Order, StoreConfig, PizzaSize } from '../types';
 
-export const imprimirCupomTermico = (order: Order, storeConfig: StoreConfig) => {
+export const imprimirCupomExato = (order: Order, storeConfig: StoreConfig) => {
   // Abre nova janela para impressão
-  const janelaImpressao = window.open('', '_blank', 'width=400,height=600');
+  const janelaImpressao = window.open('', '_blank', 'width=300,height=500');
 
   if (!janelaImpressao) {
     alert('Por favor, permita pop-ups para imprimir o cupom.');
@@ -63,309 +63,183 @@ export const imprimirCupomTermico = (order: Order, storeConfig: StoreConfig) => 
   const totalPaid = order.payments?.reduce((acc, p) => acc + p.amount, 0) || 0;
   const change = order.changeNeeded || 0;
 
-  // HTML LIMPO para impressão térmica
+  // HTML COMPLETAMENTE PURO - ZERO CLASSES CSS - TUDO INLINE
   const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>Cupom - ${storeConfig.name || 'Pizzaria Zattera'}</title>
-      <meta charset="UTF-8">
-      <style>
-        /* RESET COMPLETO - NADA MAIS EXISTE */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cupom</title>
+  <meta charset="UTF-8">
+  <style>
+    /* RESET ABSOLUTO */
+    body, html, div, span, p, br, hr {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font-size: 100%;
+      font: inherit;
+      vertical-align: baseline;
+    }
 
-        /* CONFIGURAÇÃO PARA 80mm */
-        @page {
-          size: 80mm auto;
-          margin: 0;
-          padding: 0;
-        }
+    /* CONFIG IMPRESSORA 80mm */
+    @page {
+      size: 80mm auto;
+      margin: 0;
+    }
 
-        @media print {
-          body {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-        }
+    body {
+      width: 80mm;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 11pt;
+      line-height: 1;
+      color: black;
+      background: white;
+      padding: 2mm 3mm;
+      margin: 0;
+      font-weight: normal;
+    }
 
-        body {
-          width: 80mm;
-          font-family: 'Courier New', monospace;
-          font-size: 9pt;
-          line-height: 1.1;
-          color: #000000;
-          background: white;
-          padding: 2mm 3mm;
-          margin: 0;
-        }
+    /* IMPEDIR QUALQUER ELEMENTO EXTRA */
+    *:not(body):not(div):not(span):not(br):not(hr) {
+      display: none !important;
+    }
 
-        /* ESTILOS DO CUPOM */
-        .cabecalho {
-          text-align: center;
-          font-weight: bold;
-          margin-bottom: 2mm;
-          border-bottom: 1px solid #000;
-          padding-bottom: 1mm;
-        }
+    /* OCULTAR TUDO NA IMPRESSÃO */
+    @media print {
+      html, body {
+        width: 80mm !important;
+        height: auto !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
 
-        .titulo {
-          font-size: 12pt;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
+      /* FORÇAR FONTE ESCURA */
+      * {
+        color: black !important;
+        background: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- CABEÇALHO -->
+  <div style="text-align: center; font-size: 13pt; font-weight: bold; margin-bottom: 2mm;">${storeConfig.name || 'ZATTERA PIZZARIA'}</div>
 
-        .sub-titulo {
-          font-size: 8pt;
-          margin-top: 1mm;
-        }
+  <div style="text-align: center; font-size: 10pt; margin-bottom: 3mm;">
+    ${storeConfig.address || 'RUA TIRADENTES, 405 - JANGADA'}<br>
+    CNPJ: ${storeConfig.cnpj || '46.359.369/0001-24'}
+  </div>
 
-        .linha {
-          height: 1px;
-          background: #000;
-          margin: 2mm 0;
-        }
+  <hr style="border: none; border-top: 1px solid black; margin: 2mm 0 3mm 0;">
 
-        .linha-grossa {
-          height: 2px;
-          background: #000;
-          margin: 3mm 0;
-        }
+  <!-- INFO PEDIDO -->
+  <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 10pt; margin-bottom: 3mm;">
+    <span>RECIBO: ${order.id.slice(-4).toUpperCase()}</span>
+    <span>${formatDate(order.date)}</span>
+  </div>
 
-        .info-pedido {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 2mm;
-          font-weight: bold;
-          font-size: 10pt;
-        }
+  <!-- CLIENTE -->
+  <div style="font-size: 10pt; margin-bottom: 3mm;">
+    <div style="font-weight: bold;">${order.customerName || 'CLIENTE'}</div>
+    ${order.customerPhone ? `<div>FONE: ${order.customerPhone}</div>` : ''}
+  </div>
 
-        .cliente {
-          background: #f0f0f0;
-          padding: 2mm;
-          margin-bottom: 3mm;
-          border: 1px solid #ccc;
-          font-size: 9pt;
-        }
+  <!-- TIPO DE PEDIDO -->
+  <div style="font-weight: bold; font-size: 11pt; margin: 3mm 0;">PEDIDO: ${order.id.slice(-4).toUpperCase()}</div>
 
-        .tipo-pedido {
-          text-align: center;
-          font-weight: bold;
-          font-size: 11pt;
-          text-transform: uppercase;
-          padding: 3mm 2mm;
-          border: 2px dashed #000;
-          background: #f5f5f5;
-          margin-bottom: 3mm;
-          letter-spacing: 1px;
-        }
+  <!-- ENDEREÇO SE FOR ENTREGA -->
+  ${order.orderType === 'DELIVERY' && enderecoFormatado ? `
+    <div style="font-weight: bold; font-size: 10pt; margin-bottom: 2mm;">ENDEREÇO</div>
+    <div style="font-size: 9pt; white-space: pre-line; margin-bottom: 3mm;">${enderecoFormatado.toUpperCase()}</div>
+  ` : ''}
 
-        .endereco {
-          background: #fff3cd;
-          padding: 2mm;
-          margin-bottom: 3mm;
-          border: 1px solid #ffeaa7;
-          font-size: 8pt;
-          font-weight: bold;
-        }
+  <hr style="border: none; border-top: 1px solid black; margin: 3mm 0;">
 
-        .itens {
-          margin-bottom: 3mm;
-        }
+  <!-- CABEÇALHO DOS ITENS -->
+  <div style="display: grid; grid-template-columns: 15mm 25mm 12mm 12mm; font-weight: bold; font-size: 9pt; margin-bottom: 1mm;">
+    <span>QTD</span>
+    <span>DESCRIÇÃO</span>
+    <span>VL UNIT</span>
+    <span>VL TOTAL</span>
+  </div>
 
-        .item-row {
-          display: grid;
-          grid-template-columns: 12mm 1fr 18mm;
-          font-size: 9pt;
-          margin-bottom: 1mm;
-          align-items: start;
-        }
+  <hr style="border: none; border-top: 1px solid black; margin-bottom: 2mm;">
 
-        .item-qtd {
-          text-align: center;
-          font-weight: bold;
-        }
+  <!-- ITENS DO PEDIDO -->
+  ${processedItems.map(item => `
+    <div style="display: grid; grid-template-columns: 15mm 25mm 12mm 12mm; font-size: 9pt; margin-bottom: 1mm; align-items: start;">
+      <span>${item.qtd}</span>
+      <span style="margin-left: 2mm; line-height: 1.2;">${item.descricao}</span>
+      <span>${(parseFloat(item.total.replace(',', '.')) / item.qtd).toFixed(2).replace('.', ',')}</span>
+      <span>${item.total}</span>
+    </div>
+  `).join('')}
 
-        .item-desc {
-          margin-left: 2mm;
-          line-height: 1.2;
-        }
+  <hr style="border: none; border-top: 1px solid black; margin: 2mm 0;">
 
-        .item-total {
-          text-align: right;
-          font-weight: bold;
-        }
-
-        .totais {
-          margin-bottom: 3mm;
-          font-size: 9pt;
-        }
-
-        .total-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 1mm;
-        }
-
-        .total-final {
-          display: flex;
-          justify-content: space-between;
-          font-size: 11pt;
-          font-weight: bold;
-          margin-top: 2mm;
-          padding-top: 2mm;
-          border-top: 1px solid #000;
-        }
-
-        .pagamento {
-          margin-bottom: 3mm;
-          font-size: 9pt;
-        }
-
-        .pagamento-item {
-          margin-bottom: 1mm;
-        }
-
-        .troco {
-          font-weight: bold;
-          color: #d9534f;
-          margin-top: 2mm;
-        }
-
-        .rodape {
-          text-align: center;
-          font-size: 9pt;
-          font-weight: bold;
-          margin-top: 3mm;
-          line-height: 1.3;
-        }
-
-        .data-impressao {
-          text-align: center;
-          font-size: 8pt;
-          margin-top: 2mm;
-        }
-      </style>
-    </head>
-    <body>
-      <!-- CABEÇALHO -->
-      <div class="cabecalho">
-        <div class="titulo">${storeConfig.name || 'PIZZARIA ZATTERA'}</div>
-        <div class="sub-titulo">${storeConfig.address || 'Rua Tiradentes, 403 - JANGADA'}<br>CNPJ: ${storeConfig.cnpj || '46.339.369/0001-24'}</div>
+  <!-- TOTAIS -->
+  <div style="font-size: 10pt; margin-bottom: 2mm;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1mm;">
+      <span>SUBTOTAL:</span>
+      <span>${formatCurrency(order.subtotal)}</span>
+    </div>
+    ${order.deliveryFee > 0 ? `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 1mm;">
+        <span>ENTREGA:</span>
+        <span>${formatCurrency(order.deliveryFee)}</span>
       </div>
+    ` : ''}
+    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11pt; margin-top: 2mm; padding-top: 2mm; border-top: 1px solid black;">
+      <span>TOTAL:</span>
+      <span>${formatCurrency(order.total)}</span>
+    </div>
+  </div>
 
-      <!-- LINHA SEPARADORA GROSSA -->
-      <div class="linha-grossa"></div>
-
-      <!-- INFO PEDIDO -->
-      <div class="info-pedido">
-        <span>PEDIDO N°: ${order.id.slice(-4).toUpperCase()}</span>
-        <span>${formatDate(order.date)}</span>
+  <!-- PAGAMENTO -->
+  <div style="font-size: 10pt; margin-bottom: 2mm;">
+    <div style="font-weight: bold; margin-bottom: 2mm;">FORMA DE PAGAMENTO:</div>
+    ${order.payments?.map(payment => `
+      <div style="margin-bottom: 1mm;">
+        ${payment.method === 'CASH' ? 'DINHEIRO' :
+          payment.method === 'PIX' ? 'PIX' :
+          payment.method === 'CREDIT_CARD' ? 'CARTÃO CRÉDITO' :
+          payment.method === 'DEBIT_CARD' ? 'CARTÃO DÉBITO' : payment.method}
+        : ${formatCurrency(payment.amount)}
       </div>
+    `).join('')}
+    ${change > 0 ? `
+      <div style="font-weight: bold; margin-top: 2mm; color: black;">TROCO: ${formatCurrency(change)}</div>
+    ` : ''}
+  </div>
 
-      <!-- CLIENTE -->
-      <div class="cliente">
-        <div><strong>CLIENTE:</strong> ${order.customerName || 'Visitante'}</div>
-        ${order.customerPhone ? `<div style="margin-top: 1mm;"><strong>TEL:</strong> ${order.customerPhone}</div>` : ''}
-      </div>
+  <hr style="border: none; border-top: 1px solid black; margin: 3mm 0;">
 
-      <!-- TIPO DE PEDIDO -->
-      <div class="tipo-pedido">
-        ${order.orderType === 'DELIVERY' ? 'ENTREGA' : 'RETIRADA'}
-      </div>
+  <!-- RODAPÉ -->
+  <div style="text-align: center; font-size: 10pt; font-weight: bold; margin-bottom: 2mm; line-height: 1.3;">
+    OBRIGADO PELA PREFERÊNCIA!<br>
+    VOLTE SEMPRE!
+  </div>
 
-      <!-- ENDEREÇO SE FOR ENTREGA -->
-      ${order.orderType === 'DELIVERY' && enderecoFormatado ? `
-        <div class="endereco">
-          <div style="margin-bottom: 1mm;"><strong>ENDEREÇO:</strong></div>
-          <div>${enderecoFormatado.toUpperCase()}</div>
-        </div>
-      ` : ''}
+  <div style="text-align: center; font-size: 9pt; margin-top: 2mm;">
+    ${formatDate(new Date())}
+  </div>
 
-      <!-- LINHA SEPARADORA -->
-      <div class="linha"></div>
-
-      <!-- ITENS DO PEDIDO -->
-      <div class="itens">
-        ${processedItems.map(item => `
-          <div class="item-row">
-            <span class="item-qtd">${item.qtd}x</span>
-            <span class="item-desc">${item.descricao}</span>
-            <span class="item-total">${item.total}</span>
-          </div>
-        `).join('')}
-      </div>
-
-      <!-- LINHA SEPARADORA -->
-      <div class="linha"></div>
-
-      <!-- TOTAIS -->
-      <div class="totais">
-        <div class="total-row">
-          <span>SUBTOTAL:</span>
-          <span>${formatCurrency(order.subtotal)}</span>
-        </div>
-        ${order.deliveryFee > 0 ? `
-          <div class="total-row">
-            <span>ENTREGA:</span>
-            <span>${formatCurrency(order.deliveryFee)}</span>
-          </div>
-        ` : ''}
-        <div class="total-final">
-          <span>TOTAL:</span>
-          <span>${formatCurrency(order.total)}</span>
-        </div>
-      </div>
-
-      <!-- PAGAMENTO -->
-      <div class="pagamento">
-        <div style="margin-bottom: 2mm; font-weight: bold;">FORMA DE PAGAMENTO:</div>
-        ${order.payments?.map(payment => `
-          <div class="pagamento-item">
-            ${payment.method === 'CASH' ? 'DINHEIRO' :
-              payment.method === 'PIX' ? 'PIX' :
-              payment.method === 'CREDIT_CARD' ? 'CARTÃO CRÉDITO' :
-              payment.method === 'DEBIT_CARD' ? 'CARTÃO DÉBITO' : payment.method}
-            : ${formatCurrency(payment.amount)}
-          </div>
-        `).join('')}
-        ${change > 0 ? `
-          <div class="troco">
-            TROCO: ${formatCurrency(change)}
-          </div>
-        ` : ''}
-      </div>
-
-      <!-- LINHA SEPARADORA -->
-      <div class="linha-grossa"></div>
-
-      <!-- RODAPÉ -->
-      <div class="rodape">
-        OBRIGADO PELA PREFERÊNCIA!<br>
-        VOLTE SEMPRE!
-      </div>
-
-      <div class="data-impressao">
-        ${formatDate(new Date())}
-      </div>
-
-      <script>
-        // Imprimir automaticamente quando carregar
-        window.onload = function() {
-          setTimeout(function() {
-            window.print();
-            setTimeout(function() {
-              window.close();
-            }, 500);
-          }, 100);
-        };
-      </script>
-    </body>
-    </html>
+  <script>
+    // Imprimir automaticamente quando carregar
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+        setTimeout(function() {
+          window.close();
+        }, 500);
+      }, 100);
+    };
+  </script>
+</body>
+</html>
   `;
 
   // Escrever o HTML na nova janela
