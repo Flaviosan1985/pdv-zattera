@@ -1,5 +1,6 @@
 import React from 'react';
 import { Order, PizzaSize, StoreConfig, PaymentPart } from '../types';
+import { imprimirCupomTermico } from '../services/printService';
 
 interface PrintReceiptModalProps {
   order: Order | null;
@@ -64,50 +65,15 @@ const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ order, storeConfi
     : null;
 
   const handlePrint = () => {
-    window.print();
+    if (order && storeConfig) {
+      imprimirCupomTermico(order, storeConfig);
+    }
   };
 
   return (
     <>
       <style>
         {`
-          @media print {
-            @page {
-              size: 80mm auto;
-              margin: 0;
-              padding: 0;
-            }
-
-            * {
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
-
-            body * {
-              visibility: hidden;
-            }
-
-            .cupom-content, .cupom-content * {
-              visibility: visible;
-            }
-
-            .cupom-content {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 80mm !important;
-              padding: 1mm 2mm;
-              font-size: 10pt;
-              line-height: 1;
-              font-family: 'Courier New', monospace !important;
-            }
-
-            .print-controls, .no-print {
-              display: none !important;
-            }
-          }
-
           .print-modal-overlay {
             position: fixed;
             top: 0;
@@ -170,6 +136,10 @@ const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ order, storeConfi
 
       <div className="print-modal-overlay">
         <div className="print-modal-content">
+          <div style={{ textAlign: 'center', marginBottom: '15px', padding: '10px', background: '#e3f2fd', borderRadius: '4px', border: '1px solid #2196f3' }}>
+            <strong>🖨️ Preview do Cupom</strong><br />
+            <small style={{ color: '#666' }}>Esta é apenas uma visualização. A impressão será feita em HTML puro otimizado para impressora térmica.</small>
+          </div>
           <div className="cupom-content">
             {/* CABEÇALHO GRANDE E EM DESTAQUE */}
             <div style={{
@@ -359,7 +329,7 @@ const PrintReceiptModal: React.FC<PrintReceiptModalProps> = ({ order, storeConfi
           </div>
 
           <div className="print-controls">
-            <button onClick={handlePrint}>🖨️ Imprimir</button>
+            <button onClick={handlePrint}>🖨️ Imprimir Cupom Térmico</button>
             <button onClick={onClose}>Fechar</button>
           </div>
         </div>
