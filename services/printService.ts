@@ -1,4 +1,4 @@
-import { Order, StoreConfig } from '../types';
+import { Order, StoreConfig, PizzaSize } from '../types';
 
 export const imprimirCupomTermico = (order: Order, storeConfig: StoreConfig) => {
   // Abre nova janela para impressão
@@ -28,7 +28,7 @@ export const imprimirCupomTermico = (order: Order, storeConfig: StoreConfig) => 
   // Processar itens para o formato do cupom
   const processedItems = order.items.map(item => {
     let basePrice = 0;
-    const isSmall = item.selectedSize === 'BROTO';
+    const isSmall = item.selectedSize === PizzaSize.SMALL;
 
     if (item.isHalfAndHalf) {
       const products = [item.product, item.secondProduct, item.thirdProduct].filter((p): p is typeof item.product => !!p);
@@ -46,7 +46,7 @@ export const imprimirCupomTermico = (order: Order, storeConfig: StoreConfig) => 
     }
 
     if (item.selectedSize) {
-      description += ` [${item.selectedSize}]`;
+      description += ` [${item.selectedSize === PizzaSize.SMALL ? 'BROTO' : item.selectedSize === PizzaSize.MEDIUM ? 'MEDIA' : 'GRANDE'}]`;
     }
 
     return {
